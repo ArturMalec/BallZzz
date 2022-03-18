@@ -45,6 +45,8 @@ public class Ball : MonoBehaviour
       
         if (Input.GetMouseButtonUp(0) && !GameManager.Instance.IsInputBlocked && isAllowToMove)
         {
+            GameManager.Instance.Touches = 0;
+            GameManager.Instance.IsFirstBallTouchedGround = false;
             GetComponent<Rigidbody2D>().AddRelativeForce(Vector2.up * MOVE_SPEED * Time.deltaTime, ForceMode2D.Impulse);
             _DirectionArrow.SetActive(false);
             isFlying = true;
@@ -52,18 +54,30 @@ public class Ball : MonoBehaviour
         }
 
     }
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Bottom")
         {
             isFlying = false;
             GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-            
+
             if (GameManager.Instance.IsGameStarted)
             {
-                GameManager.Instance.OnBallBottomTouch?.Invoke();
-            }           
+                GameManager.Instance.Touches++;
+                GameManager.Instance.OnBallTouchedGround?.Invoke();
+                
+                if (!GameManager.Instance.IsFirstBallTouchedGround)
+                {
+                    GameManager.Instance.OnNewLevelCall?.Invoke();
+                    GameManager.Instance.IsFirstBallTouchedGround = true;
+                    GameManager.MainBall = this;
+                }
+                else
+                {
+                    transform.position = GameManager.MainBall.transform.position;
+                }
+                
+            }
         }
     }
-
 }

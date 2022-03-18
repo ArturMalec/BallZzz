@@ -20,17 +20,25 @@ public class GameManager : MonoBehaviour
     [SerializeField] Text _CollectRingsText;
 
     public static GameManager Instance;
-    public Action OnBallBottomTouch;
+    public static Ball MainBall;
+    public Action OnNewLevelCall;
     public Action OnGameEnd;
+    public Action OnBallTouchedGround;
     public Action OnRingCollect;
+    public Action OnNewBallCollect;
+    private List<Ball> ballsList = new List<Ball>();
     private int level = 0;
     private int rings = 0;
+    private int touches = 0;
+    private bool isFirstBallTouchedGround = false;
     private bool isGameStarted = false;
     private bool isInputBlocked = false;
 
     public int Level { get { return level; } set { level = value; } }
+    public int Touches { get { return touches; } set { touches = value; } }
     public bool IsGameStarted { get { return isGameStarted; } set { isGameStarted = value; } }
     public bool IsInputBlocked { get { return isInputBlocked; } private set { isInputBlocked = value; } }
+    public bool IsFirstBallTouchedGround { get { return isFirstBallTouchedGround; } set { isFirstBallTouchedGround = value; } }
 
     private void Awake()
     {
@@ -45,9 +53,12 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         InstantiateLevel();
-        OnBallBottomTouch += InstantiateLevel;
+        OnNewLevelCall += InstantiateLevel;
+        OnNewLevelCall += test;
         OnGameEnd += EndGame;
         OnRingCollect += CollectRing;
+        OnBallTouchedGround += test;
+        OnNewBallCollect += CollectBall;
 
         if (PlayerPrefs.HasKey("CollectedRings"))
         {
@@ -55,9 +66,12 @@ public class GameManager : MonoBehaviour
         }
 
         _CollectRingsText.text = "= " + rings.ToString();
-        Ball firstBall = Instantiate(_BallPrefab, _BallsContainer);
-        firstBall.transform.position = _StartSpawnPoint.position;
-        firstBall.transform.localScale = _StartSpawnPoint.localScale;
+        InstantiateNewBall(_StartSpawnPoint);
+    }
+
+    private void Update()
+    {
+        
     }
 
     private void EndGame()
@@ -67,6 +81,14 @@ public class GameManager : MonoBehaviour
         isInputBlocked = true;
     }
 
+    private void test()
+    {
+        Debug.Log("Ilosc kulek: " + ballsList.Count.ToString());
+        Debug.Log("Ilosc dotkniec: " + Touches.ToString());
+
+
+    }
+
     private void CollectRing()
     {
         rings++;
@@ -74,9 +96,40 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetInt("CollectedRings", rings);
     }
 
+    private void CollectBall()
+    {
+        StartCoroutine(WaitForInstantiateNewBall());
+    }
+
+    IEnumerator WaitForInstantiateNewBall()
+    {
+        yield return new WaitUntil(() => Touches == ballsList.Count);
+        InstantiateNewBall(MainBall.transform);
+    }
+
+    public void InstantiateNewBall(Transform trs)
+    {
+        Ball ball = Instantiate(_BallPrefab, _BallsContainer);
+        ball.transform.position = trs.position;
+        ball.transform.rotation = trs.rotation;
+        ballsList.Add(ball);
+    }
+
 
     public void InstantiateLevel()
     {
+        StartCoroutine(WaitForAllTouches());
+    }
+
+    IEnumerator WaitForAllTouches()
+    {
+        if (ballsList.Count > 0)
+        {
+            isInputBlocked = true;
+            yield return new WaitUntil(() => Touches == ballsList.Count);
+            isInputBlocked = false;
+        }
+
         Level++;
         _ScoreText.text = "SCORE: " + Level.ToString();
         List<Block> instantiantedBlocks = new List<Block>();
@@ -96,8 +149,13 @@ public class GameManager : MonoBehaviour
         }
         if (Level % 2 == 0)
         {
-            instantiantedBlocks[UnityEngine.Random.Range(0, instantiantedBlocks.Count)].TransformToCollectionRing();
+            instantiantedBlocks[UnityEngine.Random.Range(0, instantiantedBlocks.Count)].TransformToRingOrBall(Block.BlockTransformsTypes.collectionRing);
         }
+        if (Level > 2)
+        {
+            instantiantedBlocks[UnityEngine.Random.Range(0, instantiantedBlocks.Count)].TransformToRingOrBall(Block.BlockTransformsTypes.newBall);
+        }
+
     }
 
     public void TryAgain()

@@ -7,12 +7,17 @@ public class Block : MonoBehaviour
 {
     [SerializeField] Text _BlockLifesText;
     [SerializeField] Image _CollectionRingImage;
+    [SerializeField] Image _NewBallImage;
     [SerializeField] Color32 _EasyLevelColor;
     [SerializeField] Color32 _MediumLevelColor;
     [SerializeField] Color32 _HardLevelColor;
     [SerializeField] Color32 _ExtremeLevelColor;
 
     private int lifes;
+
+    public enum BlockTransformsTypes { collectionRing = 0, newBall = 1 }
+
+    private BlockTransformsTypes transformType;
     public int Lifes { get { return lifes; } set { lifes = value; } }
 
     private void Start()
@@ -47,7 +52,15 @@ public class Block : MonoBehaviour
         if (collision.gameObject.tag == "Ball")
         {
             MakeObjectInvisible();
-            GameManager.Instance.OnRingCollect?.Invoke();
+            switch (transformType)
+            {
+                case BlockTransformsTypes.collectionRing:
+                    GameManager.Instance.OnRingCollect?.Invoke();
+                    break;
+                case BlockTransformsTypes.newBall:
+                    GameManager.Instance.OnNewBallCollect?.Invoke();
+                    break;
+            }                 
         }
 
     }
@@ -69,15 +82,26 @@ public class Block : MonoBehaviour
         GetComponent<Image>().enabled = false;
         GetComponent<BoxCollider2D>().enabled = false;
         _CollectionRingImage.enabled = false;
+        _NewBallImage.enabled = false;
         _BlockLifesText.enabled = false;
     }
 
-    public void TransformToCollectionRing()
+    public void TransformToRingOrBall(BlockTransformsTypes type)
     {
+        switch (type)
+        {
+            case BlockTransformsTypes.collectionRing:
+                _CollectionRingImage.enabled = true;
+                break;
+            case BlockTransformsTypes.newBall:
+                _NewBallImage.enabled = true;
+                break;
+        }
+
         GetComponent<Image>().enabled = false;
-        _CollectionRingImage.enabled = true;
         _BlockLifesText.enabled = false;
         GetComponent<BoxCollider2D>().enabled = true;
         GetComponent<BoxCollider2D>().isTrigger = true;
+        transformType = type;
     }
 }
