@@ -11,8 +11,6 @@ public class Ball : MonoBehaviour
     [SerializeField] GameObject _DirectionArrow;
 
     private bool isFlying = false;
-    private bool isAllowToMove = true;
-
 
     private void Update()
     {
@@ -22,38 +20,49 @@ public class Ball : MonoBehaviour
         }
 
         if (Input.GetMouseButton(0) && !isFlying && !GameManager.Instance.IsInputBlocked)
-        {          
-            _DirectionArrow.SetActive(true);
+        {
+            DisableArrow(false);
             transform.Rotate(transform.rotation.x, transform.rotation.y, (Input.GetAxis("Mouse Y") * ROTATE_SPEED * Time.deltaTime), Space.World);
 
             if (transform.rotation.z <= -MAX_ROTATION)
             {
-                _DirectionArrow.SetActive(false);
-                isAllowToMove = false;
+                DisableArrow(true);
+                GameManager.Instance.IsAllowToMove = false;
             }
             else if (transform.rotation.z >= MAX_ROTATION)
             {
-                _DirectionArrow.SetActive(false);
-                isAllowToMove = false;
+                DisableArrow(true);
+                GameManager.Instance.IsAllowToMove = false;
             }
             else
             {
-                _DirectionArrow.SetActive(true);
-                isAllowToMove = true;
+                DisableArrow(false);
+                GameManager.Instance.IsAllowToMove = true;
             }
         }
-      
-        if (Input.GetMouseButtonUp(0) && !GameManager.Instance.IsInputBlocked && isAllowToMove)
-        {
-            GameManager.Instance.Touches = 0;
-            GameManager.Instance.IsFirstBallTouchedGround = false;
-            GetComponent<Rigidbody2D>().AddRelativeForce(Vector2.up * MOVE_SPEED * Time.deltaTime, ForceMode2D.Impulse);
-            _DirectionArrow.SetActive(false);
-            isFlying = true;
-            GameManager.Instance.IsGameStarted = true;
-        }
-
     }
+
+    public void LaunchBall()
+    {
+        if (GameManager.Instance.IsAllowToMove)
+        {
+            GetComponent<Rigidbody2D>().AddRelativeForce(Vector2.up * MOVE_SPEED * Time.deltaTime, ForceMode2D.Impulse);
+            isFlying = true;
+        }      
+    }
+
+    /// <summary>
+    /// Disable or enable direction arrow
+    /// </summary>
+    /// <param name="state"></param>
+    public void DisableArrow(bool state)
+    {
+        if (state)
+            _DirectionArrow.SetActive(false);
+        else
+            _DirectionArrow.SetActive(true);
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Bottom")

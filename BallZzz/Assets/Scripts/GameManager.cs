@@ -31,14 +31,17 @@ public class GameManager : MonoBehaviour
     private int rings = 0;
     private int touches = 0;
     private bool isFirstBallTouchedGround = false;
+    private bool isFirstBallLaunched = false;
     private bool isGameStarted = false;
     private bool isInputBlocked = false;
+    private bool isAllowToMove = true;
 
     public int Level { get { return level; } set { level = value; } }
     public int Touches { get { return touches; } set { touches = value; } }
     public bool IsGameStarted { get { return isGameStarted; } set { isGameStarted = value; } }
     public bool IsInputBlocked { get { return isInputBlocked; } private set { isInputBlocked = value; } }
     public bool IsFirstBallTouchedGround { get { return isFirstBallTouchedGround; } set { isFirstBallTouchedGround = value; } }
+    public bool IsAllowToMove { get { return isAllowToMove; } set { isAllowToMove = value; } }
 
     private void Awake()
     {
@@ -71,7 +74,33 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        
+        if (Input.GetMouseButtonUp(0) && !IsInputBlocked && IsAllowToMove)
+        {          
+            Touches = 0;
+            IsFirstBallTouchedGround = false;
+
+            for (int i = 0; i < ballsList.Count; i++)
+            {
+                ballsList[i].DisableArrow(true);
+            }
+
+            StartCoroutine(WaitForLaunchBall());
+        }
+    }
+
+    IEnumerator WaitForLaunchBall()
+    {
+        IsInputBlocked = true;
+        for (int i = 0; i < ballsList.Count; i++)
+        {
+            if (isFirstBallLaunched)
+            {
+                yield return new WaitForSeconds(.1f);
+            }           
+            ballsList[i].LaunchBall();
+            isFirstBallLaunched = true;            
+        }
+        IsGameStarted = true;       
     }
 
     private void EndGame()
@@ -128,6 +157,7 @@ public class GameManager : MonoBehaviour
             isInputBlocked = true;
             yield return new WaitUntil(() => Touches == ballsList.Count);
             isInputBlocked = false;
+            isFirstBallLaunched = false;
         }
 
         Level++;
