@@ -105,7 +105,6 @@ public class GameManager : MonoBehaviour
         _AmountText.enabled = false;
         IsGameStarted = true;       
     }
-
     private void EndGame()
     {
         _EndScoreText.text = "YOUR SCORE:\n" + (Level - 1).ToString();

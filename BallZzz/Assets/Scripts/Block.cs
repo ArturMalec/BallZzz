@@ -8,6 +8,7 @@ public class Block : MonoBehaviour
     [SerializeField] Text _BlockLifesText;
     [SerializeField] Image _CollectionRingImage;
     [SerializeField] Image _NewBallImage;
+    [SerializeField] ParticleSystem _ParticleSystem;
     [SerializeField] Color32 _EasyLevelColor;
     [SerializeField] Color32 _MediumLevelColor;
     [SerializeField] Color32 _HardLevelColor;
@@ -36,7 +37,7 @@ public class Block : MonoBehaviour
             ColorManagment();
             if (Lifes <= 0)
             {
-                MakeObjectInvisible();
+                MakeObjectInvisible(true);
             }
         }       
     }
@@ -77,13 +78,18 @@ public class Block : MonoBehaviour
             GetComponent<Image>().color = _ExtremeLevelColor;
     }
 
-    public void MakeObjectInvisible()
+    public void MakeObjectInvisible(bool playParticles = false)
     {
         GetComponent<Image>().enabled = false;
         GetComponent<BoxCollider2D>().enabled = false;
         _CollectionRingImage.enabled = false;
         _NewBallImage.enabled = false;
         _BlockLifesText.enabled = false;
+
+        if (playParticles)
+        {
+            _ParticleSystem.Play();
+        }       
     }
 
     public void TransformToRingOrBall(BlockTransformsTypes type)
