@@ -11,6 +11,7 @@ public class Ball : MonoBehaviour
     [SerializeField] GameObject _DirectionArrow;
 
     private bool isFlying = false;
+    private bool isInPlayField = false;
 
     private void Update()
     {
@@ -40,7 +41,6 @@ public class Ball : MonoBehaviour
                 GameManager.Instance.IsAllowToMove = true;
             }
         }
-
     }
 
     public void LaunchBall()
@@ -64,16 +64,10 @@ public class Ball : MonoBehaviour
             _DirectionArrow.SetActive(true);
     }
 
-    public void AddSomeGravity()
-    {
-        GetComponent<Rigidbody2D>().gravityScale = .1f;
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Bottom")
         {
-            GetComponent<Rigidbody2D>().gravityScale = 0f;
             isFlying = false;
             GetComponent<Rigidbody2D>().velocity = Vector2.zero;
             
@@ -95,10 +89,19 @@ public class Ball : MonoBehaviour
             }
         }
 
-        //if (collision.gameObject.tag == "EndLine")
-        //{
-            
-        //}
+        if (collision.gameObject.tag == "EndLine")
+        {
+            if (!isInPlayField)
+            {
+                GetComponent<Rigidbody2D>().gravityScale = .1f;
+                isInPlayField = true;
+            }
+            else
+            {
+                GetComponent<Rigidbody2D>().gravityScale = 0f;
+                isInPlayField = false;
+            }
+        }
     }
 
     IEnumerator LerpToMainBall()

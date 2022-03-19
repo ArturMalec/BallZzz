@@ -96,12 +96,6 @@ public class GameManager : MonoBehaviour
             ballsList[i].LaunchBall();
             yield return new WaitForSeconds(.1f);         
         }
-
-        for (int i = 0; i < ballsList.Count; i++)
-        {
-            ballsList[i].AddSomeGravity();
-        }
-
         IsGameStarted = true;       
     }
 
