@@ -40,13 +40,14 @@ public class Ball : MonoBehaviour
                 GameManager.Instance.IsAllowToMove = true;
             }
         }
+
     }
 
     public void LaunchBall()
     {
         if (GameManager.Instance.IsAllowToMove)
         {
-            GetComponent<Rigidbody2D>().AddRelativeForce(Vector2.up * MOVE_SPEED * Time.deltaTime, ForceMode2D.Impulse);
+            GetComponent<Rigidbody2D>().AddRelativeForce(Vector2.up * MOVE_SPEED * Time.deltaTime, ForceMode2D.Impulse);           
             isFlying = true;
         }      
     }
@@ -63,13 +64,19 @@ public class Ball : MonoBehaviour
             _DirectionArrow.SetActive(true);
     }
 
+    public void AddSomeGravity()
+    {
+        GetComponent<Rigidbody2D>().gravityScale = .1f;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Bottom")
         {
+            GetComponent<Rigidbody2D>().gravityScale = 0f;
             isFlying = false;
             GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-
+            
             if (GameManager.Instance.IsGameStarted)
             {
                 GameManager.Instance.Touches++;
@@ -82,11 +89,28 @@ public class Ball : MonoBehaviour
                     GameManager.MainBall = this;
                 }
                 else
-                {
-                    transform.position = GameManager.MainBall.transform.position;
-                }
-                
+                {                   
+                    StartCoroutine(LerpToMainBall());
+                }              
             }
         }
+
+        //if (collision.gameObject.tag == "EndLine")
+        //{
+            
+        //}
+    }
+
+    IEnumerator LerpToMainBall()
+    {
+        float lerp = 0;
+        float animationTime = .1f;
+        do
+        {
+            lerp += Time.deltaTime / animationTime;
+            transform.position = Vector3.Lerp(transform.position, GameManager.MainBall.transform.position, lerp);
+            yield return null;
+        } 
+        while (lerp < 1);
     }
 }
