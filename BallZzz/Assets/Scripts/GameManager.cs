@@ -15,10 +15,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] Transform _BlocksContainer;
     [SerializeField] Transform _BallsContainer;
     [SerializeField] Transform _StartSpawnPoint;
+    [SerializeField] Transform _TextSwitchSidesPoint;
     [SerializeField] GameObject _EndGamePopUp;
     [SerializeField] Text _ScoreText;
     [SerializeField] Text _EndScoreText;
     [SerializeField] Text _CollectRingsText;
+    [SerializeField] Text _AmountText;
 
     public static GameManager Instance;
     public static Ball MainBall;
@@ -69,7 +71,8 @@ public class GameManager : MonoBehaviour
         }
 
         _CollectRingsText.text = "= " + rings.ToString();
-        InstantiateNewBall(_StartSpawnPoint);
+        MainBall = InstantiateNewBall(_StartSpawnPoint);
+        StickAmountTextToBall(MainBall.transform);
     }
 
     private void Update()
@@ -90,18 +93,23 @@ public class GameManager : MonoBehaviour
 
     IEnumerator WaitForLaunchBall()
     {
+        int ballsToLaunch = ballsList.Count;
         IsInputBlocked = true;
         for (int i = 0; i < ballsList.Count; i++)
         {
+            _AmountText.text = "x" + ballsToLaunch.ToString();
             ballsList[i].LaunchBall();
+            ballsToLaunch--;
             yield return new WaitForSeconds(.1f);         
         }
+        _AmountText.enabled = false;
         IsGameStarted = true;       
     }
 
     private void EndGame()
     {
         _EndScoreText.text = "YOUR SCORE:\n" + (Level - 1).ToString();
+        _AmountText.enabled = false;
         _EndGamePopUp.SetActive(true);
         isInputBlocked = true;
     }
@@ -132,14 +140,32 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitUntil(() => CheckForAllBallsTouchedGround());
         InstantiateNewBall(MainBall.transform);
+        _AmountText.text = "x" + ballsList.Count.ToString();
     }
 
-    public void InstantiateNewBall(Transform trs)
+    private void StickAmountTextToBall(Transform trs)
+    {
+        _AmountText.enabled = true;
+        _AmountText.transform.position = trs.transform.position;
+        float offset = 100f;
+        if (trs.localPosition.x > _TextSwitchSidesPoint.localPosition.x)
+        {
+            _AmountText.rectTransform.anchoredPosition = new Vector2(_AmountText.rectTransform.anchoredPosition.x - offset, _AmountText.rectTransform.anchoredPosition.y + offset);
+        }
+        else
+        {
+            _AmountText.rectTransform.anchoredPosition = new Vector2(_AmountText.rectTransform.anchoredPosition.x + offset, _AmountText.rectTransform.anchoredPosition.y + offset);
+        }       
+        _AmountText.text = "x" + ballsList.Count.ToString();
+    }
+
+    public Ball InstantiateNewBall(Transform trs)
     {
         Ball ball = Instantiate(_BallPrefab, _BallsContainer);
         ball.transform.position = trs.position;
-        ball.transform.rotation = trs.rotation;
+        ball.transform.rotation = trs.rotation;      
         ballsList.Add(ball);
+        return ball;
     }
 
     public bool CheckForAllBallsTouchedGround()
@@ -163,6 +189,7 @@ public class GameManager : MonoBehaviour
             isInputBlocked = true;
             yield return new WaitUntil(() => CheckForAllBallsTouchedGround());
             isInputBlocked = false;
+            StickAmountTextToBall(MainBall.transform);
         }
 
         Level++;
@@ -201,9 +228,4 @@ public class GameManager : MonoBehaviour
     {
         Application.Quit();
     }
-
-    
-
-    
-
 }
