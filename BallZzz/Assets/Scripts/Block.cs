@@ -89,6 +89,7 @@ public class Block : MonoBehaviour
         if (playParticles)
         {
             _ParticleSystem.Play();
+            GameManager.Instance.Audio.Play();
         }       
     }
 
