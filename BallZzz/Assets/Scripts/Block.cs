@@ -58,7 +58,7 @@ public class Block : MonoBehaviour
                     GameManager.Instance.OnRingCollect?.Invoke();
                     break;
                 case BlockTransformsTypes.newBall:
-                    GameManager.Instance.OnNewBallCollect?.Invoke();
+                    GameManager.Instance.OnNewBallCollect?.Invoke(transform.position);
                     break;
             }                 
         }

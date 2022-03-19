@@ -1149,7 +1149,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!61 &892641053
 BoxCollider2D:
@@ -1208,6 +1208,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _BallPrefab: {fileID: -7299791208118628686, guid: 883263990eabffa44a6563e64ae6194d, type: 3}
   _BlockPrefab: {fileID: 7712241779843151100, guid: 26e1cf065ae296f4b82e042ad1edfa1a, type: 3}
+  _CollectedBallPrefab: {fileID: 1382446730620003120, guid: a93691053c3de0641a1770b1878e9ee0, type: 3}
   _BlocksContainer: {fileID: 1901899295}
   _BallsContainer: {fileID: 91881998}
   _StartSpawnPoint: {fileID: 169223756}
@@ -1503,7 +1504,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -2
+  m_SortingOrder: -3
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0.1509434, g: 0.1509434, b: 0.1509434, a: 1}
   m_FlipX: 0

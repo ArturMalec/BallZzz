@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] Ball _BallPrefab;
     [SerializeField] Block _BlockPrefab;
+    [SerializeField] CollectedBall _CollectedBallPrefab;
     [SerializeField] Transform _BlocksContainer;
     [SerializeField] Transform _BallsContainer;
     [SerializeField] Transform _StartSpawnPoint;
@@ -25,7 +26,7 @@ public class GameManager : MonoBehaviour
     public Action OnGameEnd;
     public Action OnBallTouchedGround;
     public Action OnRingCollect;
-    public Action OnNewBallCollect;
+    public Action<Vector2> OnNewBallCollect;
     private List<Ball> ballsList = new List<Ball>();
     private int level = 0;
     private int rings = 0;
@@ -68,7 +69,6 @@ public class GameManager : MonoBehaviour
         }
 
         _CollectRingsText.text = "= " + rings.ToString();
-        InstantiateNewBall(_StartSpawnPoint);
         InstantiateNewBall(_StartSpawnPoint);
     }
 
@@ -121,14 +121,16 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetInt("CollectedRings", rings);
     }
 
-    private void CollectBall()
+    private void CollectBall(Vector2 position)
     {
+        CollectedBall cBall  = Instantiate(_CollectedBallPrefab, _BallsContainer);
+        cBall.transform.position = position;
         StartCoroutine(WaitForInstantiateNewBall());
     }
 
     IEnumerator WaitForInstantiateNewBall()
     {
-        yield return new WaitUntil(() => Touches == ballsList.Count);
+        yield return new WaitUntil(() => CheckForAllBallsTouchedGround());
         InstantiateNewBall(MainBall.transform);
     }
 
@@ -138,6 +140,14 @@ public class GameManager : MonoBehaviour
         ball.transform.position = trs.position;
         ball.transform.rotation = trs.rotation;
         ballsList.Add(ball);
+    }
+
+    public bool CheckForAllBallsTouchedGround()
+    {
+        if (Touches == ballsList.Count)
+            return true;
+        else
+            return false;
     }
 
 
@@ -151,7 +161,7 @@ public class GameManager : MonoBehaviour
         if (ballsList.Count > 0)
         {
             isInputBlocked = true;
-            yield return new WaitUntil(() => Touches == ballsList.Count);
+            yield return new WaitUntil(() => CheckForAllBallsTouchedGround());
             isInputBlocked = false;
         }
 
@@ -180,7 +190,6 @@ public class GameManager : MonoBehaviour
         {
             instantiantedBlocks[UnityEngine.Random.Range(0, instantiantedBlocks.Count)].TransformToRingOrBall(Block.BlockTransformsTypes.newBall);
         }
-
     }
 
     public void TryAgain()

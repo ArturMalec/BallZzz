@@ -89,7 +89,7 @@ public class Ball : MonoBehaviour
             }
         }
 
-        if (collision.gameObject.tag == "EndLine")
+        if (collision.gameObject.tag == "EndLine") // Adding some gravity to prevent ball blocking in Y pos
         {
             if (!isInPlayField)
             {
