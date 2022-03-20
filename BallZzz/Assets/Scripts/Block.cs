@@ -32,6 +32,7 @@ public class Block : MonoBehaviour
 
         if (collision.gameObject.tag == "Ball")
         {
+            GetComponent<AudioSource>().Play();
             Lifes--;
             _BlockLifesText.text = Lifes.ToString();
             ColorManagment();
@@ -88,8 +89,7 @@ public class Block : MonoBehaviour
 
         if (playParticles)
         {
-            _ParticleSystem.Play();
-            GameManager.Instance.Audio.Play();
+            _ParticleSystem.Play();            
         }       
     }
 

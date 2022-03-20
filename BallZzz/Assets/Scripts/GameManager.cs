@@ -44,7 +44,6 @@ public class GameManager : MonoBehaviour
     public bool IsInputBlocked { get { return isInputBlocked; } set { isInputBlocked = value; } }
     public bool IsFirstBallTouchedGround { get { return isFirstBallTouchedGround; } set { isFirstBallTouchedGround = value; } }
     public bool IsAllowToMove { get { return isAllowToMove; } set { isAllowToMove = value; } }
-    public AudioSource Audio { get { return GetComponent<AudioSource>(); } }
 
     private void Awake()
     {
