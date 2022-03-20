@@ -14,18 +14,27 @@ public class Block : MonoBehaviour
     [SerializeField] Color32 _HardLevelColor;
     [SerializeField] Color32 _ExtremeLevelColor;
 
+    private Image image;
+    private BoxCollider2D boxCollider;
+    private AudioSource audio;
     private int lifes;
     private bool isVisible = true;
+    private BlockTransformsTypes transformType;
 
     public enum BlockTransformsTypes { collectionRing = 0, newBall = 1 }
-
-    private BlockTransformsTypes transformType;
     public int Lifes { get { return lifes; } set { lifes = value; } }
     public bool IsVisible { get { return isVisible; } }
 
+    private void Awake()
+    {
+        image = GetComponent<Image>();
+        boxCollider = GetComponent<BoxCollider2D>();
+        audio = GetComponent<AudioSource>();      
+    }
+
     private void Start()
     {
-        _BlockLifesText.text = Lifes.ToString();
+        _BlockLifesText.text = lifes.ToString();
         ColorManagment();
     }
 
@@ -34,11 +43,11 @@ public class Block : MonoBehaviour
 
         if (collision.gameObject.tag == "Ball")
         {
-            GetComponent<AudioSource>().Play();
-            Lifes--;
-            _BlockLifesText.text = Lifes.ToString();
+            audio.Play();
+            lifes--;
+            _BlockLifesText.text = lifes.ToString();
             ColorManagment();
-            if (Lifes <= 0)
+            if (lifes <= 0)
             {
                 MakeObjectInvisible(true);
             }
@@ -71,20 +80,20 @@ public class Block : MonoBehaviour
 
     private void ColorManagment()
     {
-        if (Lifes <= 4)
-            GetComponent<Image>().color = _EasyLevelColor;
-        else if (Lifes > 4 && Lifes <= 8)
-            GetComponent<Image>().color = _MediumLevelColor;
-        else if (Lifes > 8 && Lifes <= 12)
-            GetComponent<Image>().color = _HardLevelColor;
+        if (lifes <= 4)
+            image.color = _EasyLevelColor;
+        else if (lifes > 4 && lifes <= 8)
+            image.color = _MediumLevelColor;
+        else if (lifes > 8 && lifes <= 12)
+            image.color = _HardLevelColor;
         else
-            GetComponent<Image>().color = _ExtremeLevelColor;
+            image.color = _ExtremeLevelColor;
     }
 
     public void MakeObjectInvisible(bool playParticles = false)
     {
-        GetComponent<Image>().enabled = false;
-        GetComponent<BoxCollider2D>().enabled = false;
+        image.enabled = false;
+        boxCollider.enabled = false;
         _CollectionRingImage.enabled = false;
         _NewBallImage.enabled = false;
         _BlockLifesText.enabled = false;
@@ -108,10 +117,10 @@ public class Block : MonoBehaviour
                 break;
         }
 
-        GetComponent<Image>().enabled = false;
+        image.enabled = false;
         _BlockLifesText.enabled = false;
-        GetComponent<BoxCollider2D>().enabled = true;
-        GetComponent<BoxCollider2D>().isTrigger = true;
+        boxCollider.enabled = true;
+        boxCollider.isTrigger = true;
         transformType = type;
         isVisible = false;
     }

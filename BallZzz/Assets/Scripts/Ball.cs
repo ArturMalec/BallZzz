@@ -10,14 +10,20 @@ public class Ball : MonoBehaviour
 
     [SerializeField] GameObject _DirectionArrow;
 
+    private Rigidbody2D rigidBody;
     private bool isFlying = false;
     private bool isInPlayField = false;
+
+    private void Awake()
+    {
+        rigidBody = GetComponent<Rigidbody2D>();
+    }
 
     private void Update()
     {
         if (isFlying)
         {
-            GetComponent<Rigidbody2D>().velocity = MOVE_SPEED * (GetComponent<Rigidbody2D>().velocity.normalized);
+            rigidBody.velocity = MOVE_SPEED * (rigidBody.velocity.normalized);
         }
 
         if (Input.GetMouseButton(0) && !isFlying && !GameManager.Instance.IsInputBlocked)
@@ -47,7 +53,7 @@ public class Ball : MonoBehaviour
     {
         if (GameManager.Instance.IsAllowToMove)
         {
-            GetComponent<Rigidbody2D>().AddRelativeForce(Vector2.up * MOVE_SPEED * Time.deltaTime, ForceMode2D.Impulse);           
+            rigidBody.AddRelativeForce(Vector2.up * MOVE_SPEED * Time.deltaTime, ForceMode2D.Impulse);           
             isFlying = true;
         }      
     }
@@ -69,18 +75,17 @@ public class Ball : MonoBehaviour
         if (collision.gameObject.tag == "Bottom")
         {
             isFlying = false;
-            GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+            rigidBody.velocity = Vector2.zero;
             
             if (GameManager.Instance.IsGameStarted)
             {
                 GameManager.Instance.Touches++;
-                GameManager.Instance.OnBallTouchedGround?.Invoke();
                 
                 if (!GameManager.Instance.IsFirstBallTouchedGround)
                 {
                     GameManager.Instance.OnNewLevelCall?.Invoke();
                     GameManager.Instance.IsFirstBallTouchedGround = true;
-                    GameManager.MainBall = this;
+                    GameManager.Instance.MainBall = this;
                 }
                 else
                 {                   
@@ -93,12 +98,12 @@ public class Ball : MonoBehaviour
         {
             if (!isInPlayField)
             {
-                GetComponent<Rigidbody2D>().gravityScale = .1f;
+                rigidBody.gravityScale = .1f;
                 isInPlayField = true;
             }
             else
             {
-                GetComponent<Rigidbody2D>().gravityScale = 0f;
+                rigidBody.gravityScale = 0f;
                 isInPlayField = false;
             }
         }
@@ -111,7 +116,7 @@ public class Ball : MonoBehaviour
         do
         {
             lerp += Time.deltaTime / animationTime;
-            transform.position = Vector3.Lerp(transform.position, GameManager.MainBall.transform.position, lerp);
+            transform.position = Vector3.Lerp(transform.position, GameManager.Instance.MainBall.transform.position, lerp);
             yield return null;
         } 
         while (lerp < 1);

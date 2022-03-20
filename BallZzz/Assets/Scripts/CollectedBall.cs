@@ -4,19 +4,21 @@ using UnityEngine;
 
 public class CollectedBall : MonoBehaviour
 {
-    private Vector2 ImpulseForce = new Vector2(0f, 3f);
+    private Vector2 impulseForce = new Vector2(0f, 3f);
+    private Rigidbody2D rigidBody;
 
     private void Start()
     {
-        GetComponent<Rigidbody2D>().AddForce(ImpulseForce, ForceMode2D.Impulse);
+        rigidBody = GetComponent<Rigidbody2D>();
+        rigidBody.AddForce(impulseForce, ForceMode2D.Impulse);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Bottom")
         {
-            GetComponent<Rigidbody2D>().gravityScale = 0f;
-            GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+            rigidBody.gravityScale = 0f;
+            rigidBody.velocity = Vector2.zero;
             StartCoroutine(LerpToMainBall());
         }
     }
@@ -30,7 +32,7 @@ public class CollectedBall : MonoBehaviour
         do
         {
             lerp += Time.deltaTime / animationTime;
-            transform.position = Vector3.Lerp(transform.position, GameManager.MainBall.transform.position, lerp);
+            transform.position = Vector3.Lerp(transform.position, GameManager.Instance.MainBall.transform.position, lerp);
             yield return null;
         }
         while (lerp < 1);

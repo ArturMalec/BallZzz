@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
 {
     private const int MAX_BLOCKS_IN_ROW = 7;
 
+    #region SerializeFields
     [SerializeField] Ball _BallPrefab;
     [SerializeField] Block _BlockPrefab;
     [SerializeField] CollectedBall _CollectedBallPrefab;
@@ -22,15 +23,19 @@ public class GameManager : MonoBehaviour
     [SerializeField] Text _CollectRingsText;
     [SerializeField] Text _AmountText;
     [SerializeField] Text _BestScoreText;
+    #endregion
 
+    #region PublicVariables
     public static GameManager Instance;
-    public static Ball MainBall;
     public Action OnNewLevelCall;
     public Action OnGameEnd;
-    public Action OnBallTouchedGround;
     public Action OnRingCollect;
     public Action<Vector2> OnNewBallCollect;
+    #endregion
+
+    #region PrivateVariables
     private List<Ball> ballsList = new List<Ball>();
+    private Ball mainBall;
     private int level = 0;
     private int rings = 0;
     private int touches = 0;
@@ -39,13 +44,16 @@ public class GameManager : MonoBehaviour
     private bool isGameStarted = false;
     private bool isInputBlocked = false;
     private bool isAllowToMove = true;
+    #endregion
 
-    public int Level { get { return level; } set { level = value; } }
+    #region Properties
     public int Touches { get { return touches; } set { touches = value; } }
     public bool IsGameStarted { get { return isGameStarted; } set { isGameStarted = value; } }
     public bool IsInputBlocked { get { return isInputBlocked; } set { isInputBlocked = value; } }
     public bool IsFirstBallTouchedGround { get { return isFirstBallTouchedGround; } set { isFirstBallTouchedGround = value; } }
     public bool IsAllowToMove { get { return isAllowToMove; } set { isAllowToMove = value; } }
+    public Ball MainBall { get { return mainBall; } set { mainBall = value; } }
+    #endregion
 
     private void Awake()
     {
@@ -61,10 +69,8 @@ public class GameManager : MonoBehaviour
     {
         InstantiateLevel();
         OnNewLevelCall += InstantiateLevel;
-        OnNewLevelCall += test;
         OnGameEnd += EndGame;
         OnRingCollect += CollectRing;
-        OnBallTouchedGround += test;
         OnNewBallCollect += CollectBall;
 
         if (PlayerPrefs.HasKey("CollectedRings"))
@@ -79,16 +85,16 @@ public class GameManager : MonoBehaviour
 
         _BestScoreText.text = bestScore.ToString();
         _CollectRingsText.text = rings.ToString();
-        MainBall = InstantiateNewBall(_StartSpawnPoint);
-        StickAmountTextToBall(MainBall.transform);
+        mainBall = InstantiateNewBall(_StartSpawnPoint);
+        StickAmountTextToBall(mainBall.transform);
     }
 
     private void Update()
     {
-        if (Input.GetMouseButtonUp(0) && !IsInputBlocked && IsAllowToMove)
+        if (Input.GetMouseButtonUp(0) && !isInputBlocked && isAllowToMove)
         {          
-            Touches = 0;
-            IsFirstBallTouchedGround = false;
+            touches = 0;
+            isFirstBallTouchedGround = false;
 
             for (int i = 0; i < ballsList.Count; i++)
             {
@@ -102,7 +108,7 @@ public class GameManager : MonoBehaviour
     IEnumerator WaitForLaunchBall()
     {
         int ballsToLaunch = ballsList.Count;
-        IsInputBlocked = true;
+        isInputBlocked = true;
         for (int i = 0; i < ballsList.Count; i++)
         {
             _AmountText.text = "x" + ballsToLaunch.ToString();
@@ -111,11 +117,11 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(.1f);         
         }
         _AmountText.enabled = false;
-        IsGameStarted = true;       
+        isGameStarted = true;       
     }
     private void EndGame()
     {
-        int score = Level - 1;
+        int score = level - 1;
         _EndScoreText.text = "YOUR SCORE:\n" + score.ToString();
         _AmountText.enabled = false;
         _EndGamePopUp.SetActive(true);
@@ -126,15 +132,6 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.SetInt("BestScore", score);
         }       
     }
-
-    private void test()
-    {
-        Debug.Log("Ilosc kulek: " + ballsList.Count.ToString());
-        Debug.Log("Ilosc dotkniec: " + Touches.ToString());
-
-
-    }
-
     private void CollectRing()
     {
         rings++;
@@ -152,7 +149,7 @@ public class GameManager : MonoBehaviour
     IEnumerator WaitForInstantiateNewBall()
     {
         yield return new WaitUntil(() => CheckForAllBallsTouchedGround());
-        InstantiateNewBall(MainBall.transform);
+        InstantiateNewBall(mainBall.transform);
         _AmountText.text = "x" + ballsList.Count.ToString();
     }
 
@@ -183,7 +180,7 @@ public class GameManager : MonoBehaviour
 
     public bool CheckForAllBallsTouchedGround()
     {
-        if (Touches == ballsList.Count)
+        if (touches == ballsList.Count)
             return true;
         else
             return false;
@@ -202,31 +199,31 @@ public class GameManager : MonoBehaviour
             isInputBlocked = true;
             yield return new WaitUntil(() => CheckForAllBallsTouchedGround());
             isInputBlocked = false;
-            StickAmountTextToBall(MainBall.transform);
+            StickAmountTextToBall(mainBall.transform);
         }
 
-        Level++;
-        _ScoreText.text = Level.ToString();
+        level++;
+        _ScoreText.text = level.ToString();
         List<Block> instantiantedBlocks = new List<Block>();
 
         for (int i = 0; i < MAX_BLOCKS_IN_ROW; i++)
         {
             Block block = Instantiate(_BlockPrefab, _BlocksContainer);
-            block.Lifes = Level;
+            block.Lifes = level;
             instantiantedBlocks.Add(block);
         }
       
-        int blocksToRemove = Level % 2 == 0 ? 2 : 3;
+        int blocksToRemove = level % 2 == 0 ? 2 : 3;
 
         for (int i = 0; i < blocksToRemove; i++)
         {
             instantiantedBlocks[UnityEngine.Random.Range(0, instantiantedBlocks.Count)].MakeObjectInvisible();
         }
-        if (Level % 2 == 0)
+        if (level % 2 == 0)
         {
             instantiantedBlocks[UnityEngine.Random.Range(0, instantiantedBlocks.Count)].TransformToRingOrBall(Block.BlockTransformsTypes.collectionRing);
         }
-        if (Level > 2)
+        if (level > 2)
         {
             instantiantedBlocks[UnityEngine.Random.Range(0, instantiantedBlocks.Count)].TransformToRingOrBall(Block.BlockTransformsTypes.newBall);
         }
