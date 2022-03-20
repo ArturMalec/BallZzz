@@ -15,11 +15,13 @@ public class Block : MonoBehaviour
     [SerializeField] Color32 _ExtremeLevelColor;
 
     private int lifes;
+    private bool isVisible = true;
 
     public enum BlockTransformsTypes { collectionRing = 0, newBall = 1 }
 
     private BlockTransformsTypes transformType;
     public int Lifes { get { return lifes; } set { lifes = value; } }
+    public bool IsVisible { get { return isVisible; } }
 
     private void Start()
     {
@@ -69,11 +71,11 @@ public class Block : MonoBehaviour
 
     private void ColorManagment()
     {
-        if (Lifes <= 2)
+        if (Lifes <= 4)
             GetComponent<Image>().color = _EasyLevelColor;
-        else if (Lifes > 2 && Lifes <= 4)
+        else if (Lifes > 4 && Lifes <= 8)
             GetComponent<Image>().color = _MediumLevelColor;
-        else if (Lifes > 4 && Lifes <= 6)
+        else if (Lifes > 8 && Lifes <= 12)
             GetComponent<Image>().color = _HardLevelColor;
         else
             GetComponent<Image>().color = _ExtremeLevelColor;
@@ -86,6 +88,7 @@ public class Block : MonoBehaviour
         _CollectionRingImage.enabled = false;
         _NewBallImage.enabled = false;
         _BlockLifesText.enabled = false;
+        isVisible = false;
 
         if (playParticles)
         {
@@ -110,5 +113,6 @@ public class Block : MonoBehaviour
         GetComponent<BoxCollider2D>().enabled = true;
         GetComponent<BoxCollider2D>().isTrigger = true;
         transformType = type;
+        isVisible = false;
     }
 }

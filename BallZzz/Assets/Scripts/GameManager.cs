@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] Text _EndScoreText;
     [SerializeField] Text _CollectRingsText;
     [SerializeField] Text _AmountText;
+    [SerializeField] Text _BestScoreText;
 
     public static GameManager Instance;
     public static Ball MainBall;
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
     private int level = 0;
     private int rings = 0;
     private int touches = 0;
+    private int bestScore = 0;
     private bool isFirstBallTouchedGround = false;
     private bool isGameStarted = false;
     private bool isInputBlocked = false;
@@ -70,7 +72,13 @@ public class GameManager : MonoBehaviour
             rings = PlayerPrefs.GetInt("CollectedRings");
         }
 
-        _CollectRingsText.text = "= " + rings.ToString();
+        if (PlayerPrefs.HasKey("BestScore"))
+        {
+            bestScore = PlayerPrefs.GetInt("BestScore");
+        }
+
+        _BestScoreText.text = bestScore.ToString();
+        _CollectRingsText.text = rings.ToString();
         MainBall = InstantiateNewBall(_StartSpawnPoint);
         StickAmountTextToBall(MainBall.transform);
     }
@@ -107,10 +115,16 @@ public class GameManager : MonoBehaviour
     }
     private void EndGame()
     {
-        _EndScoreText.text = "YOUR SCORE:\n" + (Level - 1).ToString();
+        int score = Level - 1;
+        _EndScoreText.text = "YOUR SCORE:\n" + score.ToString();
         _AmountText.enabled = false;
         _EndGamePopUp.SetActive(true);
         isInputBlocked = true;
+
+        if (score > bestScore)
+        {
+            PlayerPrefs.SetInt("BestScore", score);
+        }       
     }
 
     private void test()
@@ -124,7 +138,7 @@ public class GameManager : MonoBehaviour
     private void CollectRing()
     {
         rings++;
-        _CollectRingsText.text = "= " + rings.ToString();
+        _CollectRingsText.text = rings.ToString();
         PlayerPrefs.SetInt("CollectedRings", rings);
     }
 
@@ -192,7 +206,7 @@ public class GameManager : MonoBehaviour
         }
 
         Level++;
-        _ScoreText.text = "SCORE: " + Level.ToString();
+        _ScoreText.text = Level.ToString();
         List<Block> instantiantedBlocks = new List<Block>();
 
         for (int i = 0; i < MAX_BLOCKS_IN_ROW; i++)
@@ -201,7 +215,7 @@ public class GameManager : MonoBehaviour
             block.Lifes = Level;
             instantiantedBlocks.Add(block);
         }
-
+      
         int blocksToRemove = Level % 2 == 0 ? 2 : 3;
 
         for (int i = 0; i < blocksToRemove; i++)
@@ -215,6 +229,18 @@ public class GameManager : MonoBehaviour
         if (Level > 2)
         {
             instantiantedBlocks[UnityEngine.Random.Range(0, instantiantedBlocks.Count)].TransformToRingOrBall(Block.BlockTransformsTypes.newBall);
+        }
+
+        int index = 0;
+
+        while (index < 1)
+        {
+            Block block = instantiantedBlocks[UnityEngine.Random.Range(0, instantiantedBlocks.Count)];
+            if (block.IsVisible)
+            {
+                block.Lifes *= 2;
+                index++;
+            }
         }
     }
 
