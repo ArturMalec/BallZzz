@@ -5,7 +5,7 @@ using UnityEngine;
 public class Ball : MonoBehaviour
 {
     private const float ROTATE_SPEED = 500f;
-    private const float MOVE_SPEED = 8f;
+    private const float MOVE_SPEED = 9f;
     private const float MAX_ROTATION = .6f;
 
     [SerializeField] GameObject _DirectionArrow;
@@ -19,7 +19,7 @@ public class Ball : MonoBehaviour
         rigidBody = GetComponent<Rigidbody2D>();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (isFlying)
         {
